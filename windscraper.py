@@ -5,11 +5,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 import numpy as np
 import pandas as pd
-
-def time_in_nl():
-    #return time in NL, regardless of o
-    pass
-
+import pytz
 
 def get_zvn_measurement():
     url = 'https://www.zvnoordwijk.nl/weer/gauges.htm'
@@ -27,15 +23,13 @@ def get_zvn_measurement():
     avg_speed = winddata[2]
     avg_heading = winddata[3]
 
-    now = datetime.now()
+    now = datetime.now(pytz.timezone('Europe/Amsterdam'))
 
     scrape_time = now.strftime('%H:%M')
     scrape_date = now.strftime('%d-%m-%y')
     measurement_age = now - measurement_timestamp
-    return ','.join([scrape_date, scrape_time, measurement_date, measurement_time, str(measurement_age.seconds), max_speed, avg_speed, avg_heading])
-
-def append_zvn_measurement(data, measurement):
-    with open(data, "a") as file_object:
+    measurement = ','.join([scrape_date, scrape_time, measurement_date, measurement_time, str(measurement_age.seconds), max_speed, avg_speed, avg_heading])
+    with open('data_katwijk.csv', "a") as file_object:
         file_object.write(measurement + '\n')
 
 def get_katwijk_measurements():
@@ -71,28 +65,28 @@ def get_katwijk_measurements():
     for dt in range(-58,1,2):
         dt = timedelta(minutes=dt)
         measurement_time_list.append(measurement_timestamp + dt)
-
-    timedeltas = range(-50,1,2)
     
     direction = direction[:-1]
 
     # check if windmeting is online:
-    if datetime.now() - measurement_timestamp < timedelta(minutes = 90):
+    now = datetime.now(pytz.timezone('Europe/Amsterdam')).replace(tzinfo=None)
+    if now - measurement_timestamp < timedelta(minutes = 90):
         status = 1
     else:
         status = 0
 
-    df = pd.DataFrame({'scrape_time': [datetime.now()]*30,
+    df = pd.DataFrame({'scrape_time': [now]*30,
                         'measurement_time': measurement_time_list,
                         'wind_speed': wind,
                         'wind_speed_max': wind_max,
                         'direction': direction,
                         'online': [status]*30
                         })
-    return df
 
-df = get_katwijk_measurements()
-df.to_csv('data_katwijk.csv',mode='a', header = False,  index=False)
+    df.to_csv('data_katwijk.csv',mode='a', header = False,  index=False)
+
+
+get_katwijk_measurements()
 
 
 
