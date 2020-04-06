@@ -1,24 +1,35 @@
 from requests import get
+from datetime import datetime
+from time import sleep
 
-url = 'https://www.zvnoordwijk.nl/weer/gauges.htm'
-response = get(url)
+def get_zvn_measurement():
+    url = 'https://www.zvnoordwijk.nl/weer/gauges.htm'
+    response = get(url)
 
-winddata = response.text.partition('var winddata =')[2][11:42]
-time = response.text.partition('weergave van')[2][:6]
-date = response.text.partition('weergave van')[2][10:18]
+    winddata = response.text.partition('var winddata =')[2][11:42]
+    winddata = winddata.replace('"','').split(',')
 
-print(date)
-winddata = winddata.replace('"','').split(',')
-max_speed = winddata[0]
-avg_speed = winddata[2]
-avg_heading = winddata[3]
+    measurement_time = response.text.partition('weergave van')[2][1:6]
+    measurement_date = response.text.partition('weergave van')[2][10:18]
+    measurement_timestamp = measurement_time + ' ' + measurement_date
+    measurement_timestamp = datetime.strptime(measurement_timestamp, '%H:%M %d-%m-%y')
 
-print(time, max_speed, avg_speed, avg_heading)
+    max_speed = winddata[0]
+    avg_speed = winddata[2]
+    avg_heading = winddata[3]
 
+    now = datetime.now()
+    scrape_time = now.strftime('%H:%M')
+    scrape_date = now.strftime('%d-%m-%y')
+    measurement_age = now - measurement_timestamp
+    return ','.join([scrape_date, scrape_time, measurement_date, measurement_time, str(measurement_age.seconds), max_speed, avg_speed, avg_heading])
+    
 
-# import re
+def append_measurement(data, measurement):
+    with open(data, "a") as file_object:
+        file_object.write(measurement + '\n')
 
-# m = re.search('(?<=abc)def', respon)
-
-# m.group(0)
-# 'def'
+while True:
+    append_measurement('data.csv', get_zvn_measurement())
+    sleep(60*5)
+        
