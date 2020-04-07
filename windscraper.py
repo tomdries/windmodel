@@ -23,7 +23,7 @@ def get_zvn_measurement():
     avg_speed = winddata[2]
     avg_heading = winddata[3]
 
-    now = datetime.now(pytz.timezone('Europe/Amsterdam'))
+    now = datetime.now(pytz.timezone('Europe/Amsterdam')).replace(tzinfo=None)
 
     scrape_time = now.strftime('%H:%M')
     scrape_date = now.strftime('%d-%m-%y')
@@ -36,7 +36,10 @@ def get_katwijk_measurements():
 
     ## SCRAPE WINDMETING:
     url = 'https://windmeting.nl/windmeting.html'
-    driver=webdriver.Firefox()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    driver=webdriver.Chrome(options=chrome_options)
     driver.implicitly_wait(3)
     driver.get(url)
     sleep(5)
@@ -55,7 +58,6 @@ def get_katwijk_measurements():
 
     wind = wind[1::2] # gooi de helft weg
     wind_max = wind_max[1::2] 
-
 
     measurement_timestamp = measurement_time + ' ' + measurement_date
     measurement_timestamp = datetime.strptime(measurement_timestamp, '%H:%M %d/%m/%Y')
@@ -84,10 +86,5 @@ def get_katwijk_measurements():
                         })
 
     df.to_csv('data_katwijk.csv',mode='a', header = False,  index=False)
-
-
-get_katwijk_measurements()
-
-
 
         
