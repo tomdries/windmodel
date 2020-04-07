@@ -86,8 +86,11 @@ def get_katwijk_measurements():
                         'direction': direction,
                         'online': [status]*30
                         })
+    df = df[['scrape_time', 'measurement_time', 'wind_speed', 'wind_speed_max', 'direction', 'online']]
+
+    df.to_csv('data_katwijk.csv',mode='a', header = False,  index=False)
+
     print(now, ': succesfully appended data')
 
-    df.to_csv('data_katwijk.csv',mode='a', header = False,  index=False, sort=True)
 
         
