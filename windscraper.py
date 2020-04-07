@@ -88,6 +88,6 @@ def get_katwijk_measurements():
                         })
     print(now, ': succesfully appended data')
 
-    df.to_csv('data_katwijk.csv',mode='a', header = False,  index=False)
+    df.to_csv('data_katwijk.csv',mode='a', header = False,  index=False, sort=True)
 
         
