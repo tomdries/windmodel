@@ -31,6 +31,7 @@ def get_zvn_measurement():
     measurement = ','.join([scrape_date, scrape_time, measurement_date, measurement_time, str(measurement_age.seconds), max_speed, avg_speed, avg_heading])
     with open('data_zvn.csv', "a") as file_object:
         file_object.write(measurement + '\n')
+    print('successfully appended zvn data')
 
 def get_katwijk_measurements():
 
