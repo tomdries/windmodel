@@ -29,7 +29,7 @@ def get_zvn_measurement():
     scrape_date = now.strftime('%d-%m-%y')
     measurement_age = now - measurement_timestamp
     measurement = ','.join([scrape_date, scrape_time, measurement_date, measurement_time, str(measurement_age.seconds), max_speed, avg_speed, avg_heading])
-    with open('data_katwijk.csv', "a") as file_object:
+    with open('data_zvn.csv', "a") as file_object:
         file_object.write(measurement + '\n')
 
 def get_katwijk_measurements():
@@ -42,7 +42,8 @@ def get_katwijk_measurements():
     driver=webdriver.Chrome(options=chrome_options)
     driver.implicitly_wait(3)
     driver.get(url)
-    sleep(5)
+    print('waiting for windmeting...')
+    sleep(10)
     wind_max = driver.execute_script('return data.windM')
     wind = driver.execute_script('return data.wind')
     direction = driver.execute_script('return data.dir')
@@ -84,6 +85,7 @@ def get_katwijk_measurements():
                         'direction': direction,
                         'online': [status]*30
                         })
+    print(now, ': succesfully appended data')
 
     df.to_csv('data_katwijk.csv',mode='a', header = False,  index=False)
 
